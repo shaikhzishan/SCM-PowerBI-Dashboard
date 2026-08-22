@@ -1,0 +1,166 @@
+// ============================================================================
+// SCM Power BI Dashboard — DAX Measures
+// Table: _Measures
+//
+// Project: Supply Chain & Commercial Intelligence Dashboard
+// Dataset: Maven Analytics — U.S. Candy Distributor
+//
+// Total measures: 17
+//
+// Notes:
+// - Measures are organized by analytical purpose.
+// - Target measures are scoped to 2024 because the source target data
+//   represents 2024-only targets and FactTargets has no DimDate relationship.
+// - Gross Profit LY remains in the model but is no longer used by the
+//   Page 1 headline KPI.
+// ============================================================================
+
+
+// ============================================================================
+// 1. CORE COMMERCIAL MEASURES
+// ============================================================================
+
+Revenue =
+SUM ( FactSales[Sales] )
+
+
+Total Cost =
+SUM ( FactSales[Cost] )
+
+
+Gross Profit =
+SUM ( FactSales[Gross Profit] )
+
+
+Units Sold =
+SUM ( FactSales[Units] )
+
+
+Orders =
+DISTINCTCOUNT ( FactSales[Order ID] )
+
+
+Customers =
+DISTINCTCOUNT ( FactSales[Customer ID] )
+
+
+// ============================================================================
+// 2. RATIO / EFFICIENCY MEASURES
+// ============================================================================
+
+Gross Margin % =
+DIVIDE (
+    [Gross Profit],
+    [Revenue],
+    0
+)
+
+
+Average Order Value =
+DIVIDE (
+    [Revenue],
+    [Orders],
+    0
+)
+
+
+// ============================================================================
+// 3. TIME-INTELLIGENCE MEASURES
+// ============================================================================
+
+Revenue LY =
+CALCULATE (
+    [Revenue],
+    SAMEPERIODLASTYEAR ( DimDate[Date] )
+)
+
+
+YoY Revenue =
+[Revenue] - [Revenue LY]
+
+
+YoY Revenue % =
+DIVIDE (
+    [YoY Revenue],
+    [Revenue LY],
+    0
+)
+
+
+Gross Profit LY =
+CALCULATE (
+    [Gross Profit],
+    SAMEPERIODLASTYEAR ( DimDate[Date] )
+)
+
+
+// NOTE:
+// Gross Profit LY is retained as a reusable prior-year measure.
+// The Page 1 headline KPI was corrected to use [Gross Profit] instead
+// of [Gross Profit LY].
+
+YoY Gross Profit % =
+DIVIDE (
+    [Gross Profit] - [Gross Profit LY],
+    [Gross Profit LY],
+    0
+)
+
+
+// ============================================================================
+// 4. TARGET MEASURES
+// ============================================================================
+
+Sales Target =
+SUM ( FactTargets[Target] )
+
+
+// The target source represents 2024-only sales targets.
+// FactTargets has no direct relationship with DimDate.
+// Revenue is therefore explicitly restricted to 2024.
+
+Target Achievement % =
+DIVIDE (
+    CALCULATE (
+        [Revenue],
+        DimDate[Year] = 2024
+    ),
+    [Sales Target],
+    0
+)
+
+
+Target Variance =
+CALCULATE (
+    [Revenue],
+    DimDate[Year] = 2024
+) - [Sales Target]
+
+
+Target Gap % =
+[Target Achievement %] - 1
+
+
+// ============================================================================
+// END OF MEASURES
+// ============================================================================
+//
+// Measure inventory:
+// 1. Revenue
+// 2. Total Cost
+// 3. Gross Profit
+// 4. Units Sold
+// 5. Orders
+// 6. Customers
+// 7. Gross Margin %
+// 8. Average Order Value
+// 9. Revenue LY
+// 10. YoY Revenue
+// 11. YoY Revenue %
+// 12. Gross Profit LY
+// 13. YoY Gross Profit %
+// 14. Sales Target
+// 15. Target Achievement %
+// 16. Target Variance
+// 17. Target Gap %
+// ============================================================================
